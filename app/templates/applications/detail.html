@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ application.application_name }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ application.application_name }}</h1>
+    <div>
+        <a href="{{ url_for('applications.edit_application', app_id=application.id) }}" class="btn btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('applications.archive_application', app_id=application.id) }}" class="d-inline"
+              onsubmit="return confirm('Archive this application? It will be hidden from the active list but not deleted.');">
+            <button type="submit" class="btn btn-outline-danger">Archive</button>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Overview</h5>
+        <table class="table table-sm">
+            <tr><th>Vendor</th><td>{{ application.vendor or "—" }}</td></tr>
+            <tr><th>Description</th><td>{{ application.description or "—" }}</td></tr>
+            <tr><th>Department</th><td>{{ application.department or "—" }}</td></tr>
+            <tr><th>Business Owner</th><td>{{ application.business_owner_name or "—" }} ({{ application.business_owner_email or "—" }})</td></tr>
+            <tr><th>Technical Owner</th><td>{{ application.technical_owner_name or "—" }} ({{ application.technical_owner_email or "—" }})</td></tr>
+            <tr><th>Status</th><td>{{ application.application_status.value }}</td></tr>
+            <tr><th>Discovery Source</th><td>{{ application.discovery_source.value }}</td></tr>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        <h5>Usage &amp; Cost</h5>
+        <table class="table table-sm">
+            <tr><th>Estimated Users</th><td>{{ application.estimated_users or "—" }}</td></tr>
+            <tr><th>License Count</th><td>{{ application.license_count or "—" }}</td></tr>
+            <tr><th>Estimated Annual Cost</th><td>{% if application.estimated_annual_cost %}${{ "%.2f"|format(application.estimated_annual_cost) }}{% else %}—{% endif %}</td></tr>
+            <tr><th>Renewal Date</th><td>{{ application.renewal_date or "—" }}</td></tr>
+            <tr><th>Contract Status</th><td>{{ application.contract_status.value if application.contract_status else "—" }}</td></tr>
+        </table>
+
+        <h5>Security Posture</h5>
+        <table class="table table-sm">
+            <tr><th>SSO Supported</th><td>{{ application.sso_supported.value }}</td></tr>
+            <tr><th>SSO Enabled</th><td>{{ application.sso_enabled.value }}</td></tr>
+            <tr><th>MFA Supported</th><td>{{ application.mfa_supported.value }}</td></tr>
+            <tr><th>MFA Enforced</th><td>{{ application.mfa_enforced.value }}</td></tr>
+            <tr><th>SCIM Supported</th><td>{{ application.scim_supported.value }}</td></tr>
+            <tr><th>Data Classification</th><td>{{ application.data_classification.value }}</td></tr>
+        </table>
+    </div>
+</div>
+
+<h5 class="mt-4">Governance</h5>
+<table class="table table-sm">
+    <tr><th>Review Status</th><td>{{ application.review_status.value }}</td></tr>
+    <tr><th>First Seen</th><td>{{ application.first_seen or "—" }}</td></tr>
+    <tr><th>Last Reviewed</th><td>{{ application.last_reviewed or "—" }}</td></tr>
+    <tr><th>Created</th><td>{{ application.created_at.strftime("%Y-%m-%d %H:%M") }} UTC by {{ application.created_by or "—" }}</td></tr>
+    <tr><th>Last Updated</th><td>{{ application.updated_at.strftime("%Y-%m-%d %H:%M") }} UTC by {{ application.updated_by or "—" }}</td></tr>
+</table>
+
+{% if application.audit_logs %}
+<h5 class="mt-4">Change History</h5>
+<table class="table table-sm table-striped">
+    <thead><tr><th>When</th><th>Field</th><th>Old Value</th><th>New Value</th><th>By</th></tr></thead>
+    <tbody>
+        {% for log in application.audit_logs|sort(attribute='changed_at', reverse=true) %}
+        <tr>
+            <td>{{ log.changed_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ log.field_changed }}</td>
+            <td>{{ log.old_value or "—" }}</td>
+            <td>{{ log.new_value or "—" }}</td>
+            <td>{{ log.changed_by or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Applications{% endblock %}
+{% block content %}
+
+<h1 class="mb-4">Applications</h1>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-auto">
+        <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search by name...">
+    </div>
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            {% for s in statuses %}
+                <option value="{{ s.value }}" {% if status_filter == s.value %}selected{% endif %}>{{ s.value }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-striped table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Vendor</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Review Status</th>
+            <th>Est. Annual Cost</th>
+            <th>Renewal Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td><a href="{{ url_for('applications.view_application', app_id=app.id) }}">{{ app.application_name }}</a></td>
+            <td>{{ app.vendor or "—" }}</td>
+            <td>{{ app.department or "—" }}</td>
+            <td><span class="badge bg-secondary">{{ app.application_status.value }}</span></td>
+            <td>{{ app.review_status.value }}</td>
+            <td>{% if app.estimated_annual_cost %}${{ "%.2f"|format(app.estimated_annual_cost) }}{% else %}—{% endif %}</td>
+            <td>{{ app.renewal_date or "—" }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">No applications found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

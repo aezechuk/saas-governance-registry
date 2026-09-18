@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}{% if application %}Edit{% else %}New{% endif %} Application{% endblock %}
+{% block content %}
+
+<h1 class="mb-4">{% if application %}Edit Application{% else %}New Application{% endif %}</h1>
+
+<form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <h5>Overview</h5>
+    <div class="mb-3">
+        <label class="form-label">Application Name *</label>
+        <input type="text" name="application_name" class="form-control" required
+               value="{{ application.application_name if application else '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Vendor</label>
+        <input type="text" name="vendor" class="form-control" value="{{ application.vendor if application else '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="2">{{ application.description if application else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Department</label>
+        <input type="text" name="department" class="form-control" value="{{ application.department if application else '' }}">
+    </div>
+
+    <h5 class="mt-4">Ownership</h5>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Business Owner Name</label>
+            <input type="text" name="business_owner_name" class="form-control" value="{{ application.business_owner_name if application else '' }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Business Owner Email</label>
+            <input type="email" name="business_owner_email" class="form-control" value="{{ application.business_owner_email if application else '' }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Technical Owner Name</label>
+            <input type="text" name="technical_owner_name" class="form-control" value="{{ application.technical_owner_name if application else '' }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Technical Owner Email</label>
+            <input type="email" name="technical_owner_email" class="form-control" value="{{ application.technical_owner_email if application else '' }}">
+        </div>
+    </div>
+
+    <h5 class="mt-4">Workflow</h5>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Application Status</label>
+            <select name="application_status" class="form-select">
+                {% for s in statuses %}
+                <option value="{{ s.value }}" {% if application and application.application_status == s %}selected{% endif %}>{{ s.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Discovery Source</label>
+            <select name="discovery_source" class="form-select">
+                {% for s in sources %}
+                <option value="{{ s.value }}" {% if application and application.discovery_source == s %}selected{% endif %}>{{ s.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <h5 class="mt-4">Usage &amp; Cost</h5>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Estimated Users</label>
+            <input type="number" name="estimated_users" class="form-control" value="{{ application.estimated_users if application else '' }}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">License Count</label>
+            <input type="number" name="license_count" class="form-control" value="{{ application.license_count if application else '' }}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Estimated Annual Cost ($)</label>
+            <input type="number" step="0.01" name="estimated_annual_cost" class="form-control" value="{{ application.estimated_annual_cost if application else '' }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Renewal Date</label>
+            <input type="date" name="renewal_date" class="form-control" value="{{ application.renewal_date if application else '' }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Contract Status</label>
+            <select name="contract_status" class="form-select">
+                {% for s in contract_statuses %}
+                <option value="{{ s.value }}" {% if application and application.contract_status == s %}selected{% endif %}>{{ s.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <h5 class="mt-4">Security Posture</h5>
+    <div class="row">
+        {% for field, label in [("sso_supported", "SSO Supported"), ("sso_enabled", "SSO Enabled"),
+                                  ("mfa_supported", "MFA Supported"), ("mfa_enforced", "MFA Enforced"),
+                                  ("scim_supported", "SCIM Supported")] %}
+        <div class="col-md-4 mb-3">
+            <label class="form-label">{{ label }}</label>
+            <select name="{{ field }}" class="form-select">
+                {% for s in yes_no_unknown %}
+                <option value="{{ s.value }}" {% if application and application[field] == s %}selected{% endif %}>{{ s.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endfor %}
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Data Classification</label>
+            <select name="data_classification" class="form-select">
+                {% for s in classifications %}
+                <option value="{{ s.value }}" {% if application and application.data_classification == s %}selected{% endif %}>{{ s.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <h5 class="mt-4">Governance</h5>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Review Status</label>
+            <select name="review_status" class="form-select">
+                {% for s in review_statuses %}
+                <option value="{{ s.value }}" {% if application and application.review_status == s %}selected{% endif %}>{{ s.value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">First Seen</label>
+            <input type="date" name="first_seen" class="form-control" value="{{ application.first_seen if application else '' }}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Last Reviewed</label>
+            <input type="date" name="last_reviewed" class="form-control" value="{{ application.last_reviewed if application else '' }}">
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('applications.list_applications') }}" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+{% endblock %}
