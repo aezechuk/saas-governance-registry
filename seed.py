@@ -209,6 +209,19 @@ def run():
     with app.app_context():
         db.create_all()
 
+        # Bulk .delete() bypasses SQLAlchemy's ORM-level cascades, so
+        # child/join tables must be cleared explicitly and in FK-safe
+        # order, or re-seeding collides with orphaned rows from a
+        # previous run (e.g. application_integrations rows left
+        # pointing at IDs that get reused).
+        from app.models import AuditLog, ApplicationIntegration
+        from app.models import SoftwareRequest, RequestAnswer, GovernanceReview
+
+        ApplicationIntegration.query.delete()
+        AuditLog.query.delete()
+        GovernanceReview.query.delete()
+        RequestAnswer.query.delete()
+        SoftwareRequest.query.delete()
         Application.query.delete()
         Integration.query.delete()
         db.session.commit()
